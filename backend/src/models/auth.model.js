@@ -1,32 +1,30 @@
-
-
-import connection from "../../db.js";
+import pool from "../../db.js";
 
 const authModel = {
    //create users
-    createUser: (username, email, password, role = 'user') => {
-        return new Promise((resolve, reject) => {
-            connection.query('INSERT INTO users (username, email, password, role) VALUES(?,?,?,?)', [username, email, password, role], (error, results) => {
-                if (error) {
-                    reject(error)
-                } else {
-                    resolve(results)
-                }
-            })
-        })
+    createUser: async (username, email, password, role = 'user') => {
+        try {
+            const [results] = await pool.execute(
+                'INSERT INTO users (username, email, password, role) VALUES(?,?,?,?)',
+                [username, email, password, role]
+            );
+            return results;
+        } catch (error) {
+            throw error;
+        }
     },
     
     // find user by email
-    findByEmail: (email) => {
-        return new Promise((resolve, reject) => {
-            connection.query('SELECT * FROM users WHERE email = ?', [email], (error, results) => {
-                if (error) {
-                    reject(error)
-                } else {
-                    resolve(results[0] || null)
-                }
-            })
-        })
+    findByEmail: async (email) => {
+        try {
+            const [results] = await pool.execute(
+                'SELECT * FROM users WHERE email = ?',
+                [email]
+            );
+            return results[0] || null;
+        } catch (error) {
+            throw error;
+        }
     },
 
 };

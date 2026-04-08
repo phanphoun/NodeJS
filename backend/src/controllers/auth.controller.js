@@ -1,19 +1,18 @@
-
 import authModel from "../models/auth.model.js"
 import bcrypt from "bcrypt"
-import jwt from "jsonwebtoken"
+import { generateToken } from "../utils/jwt.utils.js"
 
 const AuthController = {
     register: async (req, res) => {
         try{
             const {username, email, password, role = 'user'} = req.body
+
             // validate input
             if (!username || !email || !password) {
                 return res.status(400).json({message: 'Username, email and password are required'})
             }
 
             // validate role
-
             const validRoles = ['user', 'admin', 'moderator']
             if (!validRoles.includes(role)) {
                 return res.status(400).json(
@@ -48,16 +47,7 @@ const AuthController = {
             const newUser = await authModel.findByEmail(email)
 
             // Create JWT token
-            const token = jwt.sign(
-                { 
-                    id: newUser.id, 
-                    email: newUser.email, 
-                    username: newUser.username,
-                    role: newUser.role 
-                },
-                process.env.JWT_SECRET || 'your-secret-key',
-                { expiresIn: '24h' }
-            )
+            const token = generateToken(newUser)
 
             res.status(201).json({
                 message: 'User registered successfully',
@@ -71,21 +61,19 @@ const AuthController = {
             })
 
         }catch(error){
-            console.log(error)
+            console.error('Registration error:', error);
             res.status(500).json({message: 'Internal server error'})
         }
     },
 
     login: async (req, res) => {
         try {
-            console.log('Login attempt:', req.body);
             const {email, password} = req.body
             
             if (!email || !password) {
                 return res.status(400).json({message: 'Email and password are required'})
             }
 
-            console.log('Finding user by email:', email);
             const user = await authModel.findByEmail(email)
             if (!user) {
                 return res.status(401).json({message: 'Invalid credentials'})
@@ -96,16 +84,7 @@ const AuthController = {
                 return res.status(401).json({message: 'Invalid credentials'})
             }
 
-            const token = jwt.sign(
-                { 
-                    id: user.id, 
-                    email: user.email, 
-                    username: user.username,
-                    role: user.role 
-                },
-                process.env.JWT_SECRET || 'your-secret-key',
-                { expiresIn: '24h' }
-            )
+            const token = generateToken(user)
 
             res.status(200).json({
                 message: 'Login successful',
@@ -119,7 +98,7 @@ const AuthController = {
             })
 
         } catch (error) {
-            console.log(error)
+            console.error('Login error:', error);
             res.status(500).json({message: 'Internal server error'})
         }
     },
@@ -128,7 +107,7 @@ const AuthController = {
         try {
             res.status(200).json({message: 'Logout successful'})
         } catch (error) {
-            console.log(error)
+            console.error('Logout error:', error);
             res.status(500).json({message: 'Internal server error'})
         }
     },
@@ -145,7 +124,7 @@ const AuthController = {
                 }
             })
         } catch (error) {
-            console.log(error)
+            console.error('Profile error:', error);
             res.status(500).json({message: 'Internal server error'})
         }
     }
