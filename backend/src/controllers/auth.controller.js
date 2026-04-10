@@ -5,20 +5,20 @@ import jwt from "jsonwebtoken"
 
 const AuthController = {
     register: async (req, res) => {
-        try{
-            const {username, email, password, role = 'user'} = req.body
+        try {
+            const { username, email, password, role = 'user' } = req.body
             // validate input
             if (!username || !email || !password) {
-                return res.status(400).json({message: 'Username, email and password are required'})
+                return res.status(400).json({ message: 'Username, email and password are required' })
             }
 
             // validate role
 
-            const validRoles = ['user', 'admin', 'moderator']
+            const validRoles = ['user', 'admin', 'moderator', 'manager']
             if (!validRoles.includes(role)) {
                 return res.status(400).json(
                     {
-                        message: 'Invalid role. Must be user, admin or moderator'
+                        message: 'Invalid role. Must be user, admin, moderator or manager'
                     }
                 )
             }
@@ -43,17 +43,17 @@ const AuthController = {
                 hashedPassword,
                 role
             )
-            
+
             // Get created user details
             const newUser = await authModel.findByEmail(email)
 
             // Create JWT token
             const token = jwt.sign(
-                { 
-                    id: newUser.id, 
-                    email: newUser.email, 
+                {
+                    id: newUser.id,
+                    email: newUser.email,
                     username: newUser.username,
-                    role: newUser.role 
+                    role: newUser.role
                 },
                 process.env.JWT_SECRET || 'your-secret-key',
                 { expiresIn: '24h' }
@@ -70,38 +70,38 @@ const AuthController = {
                 }
             })
 
-        }catch(error){
+        } catch (error) {
             console.log(error)
-            res.status(500).json({message: 'Internal server error'})
+            res.status(500).json({ message: 'Internal server error' })
         }
     },
 
     login: async (req, res) => {
         try {
             console.log('Login attempt:', req.body);
-            const {email, password} = req.body
-            
+            const { email, password } = req.body
+
             if (!email || !password) {
-                return res.status(400).json({message: 'Email and password are required'})
+                return res.status(400).json({ message: 'Email and password are required' })
             }
 
             console.log('Finding user by email:', email);
             const user = await authModel.findByEmail(email)
             if (!user) {
-                return res.status(401).json({message: 'Invalid credentials'})
+                return res.status(401).json({ message: 'Invalid credentials' })
             }
 
             const isPasswordValid = await bcrypt.compare(password, user.password)
             if (!isPasswordValid) {
-                return res.status(401).json({message: 'Invalid credentials'})
+                return res.status(401).json({ message: 'Invalid credentials' })
             }
 
             const token = jwt.sign(
-                { 
-                    id: user.id, 
-                    email: user.email, 
+                {
+                    id: user.id,
+                    email: user.email,
                     username: user.username,
-                    role: user.role 
+                    role: user.role
                 },
                 process.env.JWT_SECRET || 'your-secret-key',
                 { expiresIn: '24h' }
@@ -120,16 +120,16 @@ const AuthController = {
 
         } catch (error) {
             console.log(error)
-            res.status(500).json({message: 'Internal server error'})
+            res.status(500).json({ message: 'Internal server error' })
         }
     },
 
     logout: async (req, res) => {
         try {
-            res.status(200).json({message: 'Logout successful'})
+            res.status(200).json({ message: 'Logout successful' })
         } catch (error) {
             console.log(error)
-            res.status(500).json({message: 'Internal server error'})
+            res.status(500).json({ message: 'Internal server error' })
         }
     },
 
@@ -146,7 +146,7 @@ const AuthController = {
             })
         } catch (error) {
             console.log(error)
-            res.status(500).json({message: 'Internal server error'})
+            res.status(500).json({ message: 'Internal server error' })
         }
     }
 }

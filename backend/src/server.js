@@ -9,8 +9,11 @@ const port = process.env.PORT;
 app.use(cors());
 app.use(express.json());
 
+// Import Route
 import authRoute from "./routes/auth.route.js";
 
+
+// Use route
 app.use("/api/auth", authRoute);
 
 app.listen(port, () => {

@@ -9,10 +9,10 @@ const connection = mysql.createConnection({
   password: process.env.DB_PASSWORD,
   database: process.env.DB_NAME,
 });
-if(connection){
+if (connection) {
   console.log("Connected to database");
 }
-else{
+else {
   console.log("Failed to connect to database");
 }
 export default connection;
